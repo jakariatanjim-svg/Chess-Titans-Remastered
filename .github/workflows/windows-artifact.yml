@@ -72,7 +72,27 @@ jobs:
           include-templates: true
 
       - name: Build Windows package
-        run: bash tools/build_windows.sh "${{ steps.version.outputs.version }}"
+        run: |
+          set +e
+          bash tools/build_windows.sh "${{ steps.version.outputs.version }}" 2>&1 | tee /tmp/windows-build.log
+          build_status=${PIPESTATUS[0]}
+          set -e
+          if [ "$build_status" -ne 0 ]; then
+            {
+              echo "### Windows build diagnostics (last 60 lines)"
+              echo '```text'
+              tail -n 60 /tmp/windows-build.log
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+            python3 - <<'PY'
+          from pathlib import Path
+          lines = Path("/tmp/windows-build.log").read_text(errors="replace").splitlines()[-30:]
+          for line in lines:
+              safe = line[:600].replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
+              print("::error title=Windows build diagnostics::" + safe)
+          PY
+            exit "$build_status"
+          fi
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
