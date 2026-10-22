@@ -32,18 +32,33 @@ if replacements != 1:
 path.write_text(text, encoding="utf-8")
 PY
 
+run_checked() {
+  local stage="$1"
+  shift
+  echo "==> $stage"
+  if "$@"; then
+    echo "<== $stage passed"
+  else
+    local status=$?
+    echo "::error::$stage failed with exit code $status"
+    return "$status"
+  fi
+}
+
+run_checked "Godot version" godot --version
+
 # Import the project and fail early on script/resource errors.
-godot --headless --editor --path . --quit
+run_checked "Import project and validate scripts" godot --headless --editor --path . --quit
 
 # Rules-only regression suite. No engine or AI is included.
-godot --headless --path . --script res://tests/test_chess_rules.gd
+run_checked "Run chess rules regression tests" godot --headless --path . --script res://tests/test_chess_rules.gd
 
 # Start the actual game scene headlessly for a short smoke test. This exercises
 # scene construction, procedural models, UI wiring, settings, and audio loading.
-godot --headless --path . --quit-after 3
+run_checked "Run headless scene smoke test" godot --headless --path . --quit-after 3
 
 # The cross-export uses Godot's Windows template, so no Rust or .NET compile is needed.
-godot --headless --path . --export-release "Windows Desktop" "$EXECUTABLE"
+run_checked "Export Windows desktop executable" godot --headless --path . --export-release "Windows Desktop" "$EXECUTABLE"
 
 if [[ ! -s "$EXECUTABLE" ]]; then
   echo "::error::Godot did not produce the Windows executable."
