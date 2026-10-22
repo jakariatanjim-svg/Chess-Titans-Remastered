@@ -41,6 +41,10 @@ run_checked() {
   else
     local status=$?
     echo "::error::$stage failed with exit code $status"
+    if [[ -f /tmp/chess-titans-godot-tests.log ]]; then
+      echo "==> Godot test log"
+      cat /tmp/chess-titans-godot-tests.log
+    fi
     return "$status"
   fi
 }
@@ -51,7 +55,8 @@ run_checked "Godot version" godot --version
 run_checked "Import project and validate scripts" godot --headless --editor --path . --quit
 
 # Rules-only regression suite. No engine or AI is included.
-run_checked "Run chess rules regression tests" godot --headless --path . --script res://tests/test_chess_rules.gd
+rm -f /tmp/chess-titans-godot-tests.log
+run_checked "Run chess rules regression tests" godot --headless --verbose --path . --log-file /tmp/chess-titans-godot-tests.log --script res://tests/test_chess_rules.gd
 
 # Start the actual game scene headlessly for a short smoke test. This exercises
 # scene construction, procedural models, UI wiring, settings, and audio loading.
