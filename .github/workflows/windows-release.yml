@@ -128,8 +128,11 @@ jobs:
             } >> "$GITHUB_STEP_SUMMARY"
             python3 - <<'PY'
           from pathlib import Path
-          lines = Path("/tmp/windows-build.log").read_text(errors="replace").splitlines()[-30:]
-          for line in lines:
+          lines = Path("/tmp/windows-build.log").read_text(errors="replace").splitlines()
+          diagnostics = [line for line in lines if any(term in line.lower() for term in ("error", "fail", "assert", "parse", "script", "invalid"))]
+          if not diagnostics:
+              diagnostics = lines[-30:]
+          for line in diagnostics[-40:]:
               safe = line[:600].replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
               print("::error title=Windows build diagnostics::" + safe)
           PY
