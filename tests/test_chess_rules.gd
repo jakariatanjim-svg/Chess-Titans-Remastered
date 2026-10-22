@@ -5,6 +5,7 @@ var failures: int = 0
 
 
 func _initialize() -> void:
+	print("RULES TEST SUITE START")
 	_test_initial_position()
 	_test_legal_moves_and_undo()
 	_test_castling()
@@ -18,6 +19,7 @@ func _initialize() -> void:
 		print("PASS: all chess-rules regression checks")
 		quit(0)
 	else:
+		print("FAIL: %d chess-rules regression check(s)" % failures)
 		push_error("FAIL: %d chess-rules regression check(s)" % failures)
 		quit(1)
 
