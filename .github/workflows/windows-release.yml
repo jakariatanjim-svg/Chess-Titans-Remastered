@@ -129,7 +129,7 @@ jobs:
             python3 - <<'PY'
           from pathlib import Path
           lines = Path("/tmp/windows-build.log").read_text(errors="replace").splitlines()
-          diagnostics = [line for line in lines if any(term in line.lower() for term in ("error", "fail", "assert", "parse", "script", "invalid", "test", "pass", "rules", "probe"))]
+          diagnostics = [line for line in lines if any(term in line.lower() for term in ("error", "fail", "assert", "parse", "invalid", "probe", "rules test suite"))]
           if not diagnostics:
               diagnostics = lines[-30:]
           for line in diagnostics[-40:]:
