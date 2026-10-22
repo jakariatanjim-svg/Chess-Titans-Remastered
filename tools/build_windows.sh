@@ -41,10 +41,6 @@ run_checked() {
   else
     local status=$?
     echo "::error::$stage failed with exit code $status"
-    if [[ -f /tmp/chess-titans-godot-tests.log ]]; then
-      echo "==> Godot test log"
-      cat /tmp/chess-titans-godot-tests.log
-    fi
     return "$status"
   fi
 }
@@ -54,9 +50,20 @@ run_checked "Godot version" godot --version
 # Import the project and fail early on script/resource errors.
 run_checked "Import project and validate scripts" godot --headless --editor --path . --quit
 
+# Verify that the CI runner can launch headless GDScript before running the suite.
+PROBE_SCRIPT="tests/.godot_ci_probe.gd"
+cat > "$PROBE_SCRIPT" <<'EOF'
+extends SceneTree
+
+func _initialize() -> void:
+	print("GODOT_SCRIPT_PROBE_OK")
+	quit(0)
+EOF
+run_checked "Verify Godot headless script execution" godot --headless --path . --script "res://$PROBE_SCRIPT"
+rm -f "$PROBE_SCRIPT"
+
 # Rules-only regression suite. No engine or AI is included.
-rm -f /tmp/chess-titans-godot-tests.log
-run_checked "Run chess rules regression tests" godot --headless --verbose --path . --log-file /tmp/chess-titans-godot-tests.log --script res://tests/test_chess_rules.gd
+run_checked "Run chess rules regression tests" godot --headless --verbose --path . --script res://tests/test_chess_rules.gd
 
 # Start the actual game scene headlessly for a short smoke test. This exercises
 # scene construction, procedural models, UI wiring, settings, and audio loading.
