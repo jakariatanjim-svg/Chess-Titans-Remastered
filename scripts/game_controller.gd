@@ -463,7 +463,7 @@ func _refresh_highlights() -> void:
 				)
 	if viewed_ply != rules.move_history.size() or selected_square.x < 0:
 		return
-	var current_piece := rules.get_piece(selected_square)
+	var current_piece: Dictionary = rules.get_piece(selected_square)
 	if current_piece.is_empty():
 		return
 	BoardFactoryScript.create_square_overlay(
@@ -568,7 +568,7 @@ func _handle_board_press(screen_position: Vector2) -> void:
 	if selected_square.x >= 0 and rules.is_legal_move(selected_square, square):
 		_request_move(selected_square, square)
 		return
-	var piece := rules.get_piece(square)
+	var piece: Dictionary = rules.get_piece(square)
 	if piece.is_empty() or piece["color"] != rules.turn:
 		return
 	selected_square = square
