@@ -132,9 +132,9 @@ jobs:
           diagnostics = [line for line in lines if any(term in line.lower() for term in ("error", "fail", "assert", "parse", "invalid", "probe", "rules test suite"))]
           if not diagnostics:
               diagnostics = lines[-30:]
-          for line in diagnostics[-40:]:
-              safe = line[:600].replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
-              print("::error title=Windows build diagnostics::" + safe)
+          details = "\n".join(line[:600] for line in diagnostics[-40:])
+          safe = details.replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
+          print("::error title=Windows build diagnostics::" + safe)
           PY
             exit "$build_status"
           fi
