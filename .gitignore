@@ -1,0 +1,22 @@
+# Godot editor/import cache
+.godot/
+.import/
+export.cfg
+
+# Exported builds and temporary packages
+/build/
+/dist/
+/release/
+*.zip
+*.exe
+*.pck
+
+# Editor / OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Python
+__pycache__/
+*.py[cod]

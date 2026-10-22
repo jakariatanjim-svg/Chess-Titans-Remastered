@@ -1,0 +1,33 @@
+; Engine configuration file.
+; Chess Titans Remastered — Godot 4.7, GDScript desktop build.
+config_version=5
+
+[application]
+config/name="Chess Titans Remastered"
+config/description="A polished, local two-player 3D chess game inspired by the Windows Vista and Windows 7 classic."
+run/main_scene="res://scenes/main.tscn"
+config/icon="res://assets/icon.svg"
+config/version="1.0-dev"
+config/features=PackedStringArray("4.7")
+
+[display]
+window/size/viewport_width=1600
+window/size/viewport_height=1000
+window/size/window_width_override=1600
+window/size/window_height_override=1000
+window/size/min_width=1280
+window/size/min_height=800
+window/size/resizable=true
+window/size/window_mode=0
+window/stretch/mode="canvas_items"
+
+[rendering]
+renderer/rendering_method="forward_plus"
+renderer/rendering_method.mobile="mobile"
+environment/defaults/default_clear_color=Color(0.025, 0.036, 0.055, 1)
+textures/default_filters/use_nearest_mipmap_filter=false
+
+[audio]
+
+[gui]
+theme/default_font_multichannel_signed_distance_field=true
