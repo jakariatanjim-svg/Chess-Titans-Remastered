@@ -1,11 +1,16 @@
 extends SceneTree
 
-const RulesScript = preload("res://scripts/chess_rules.gd")
+var rules_script: GDScript
 var failures: int = 0
 
 
 func _initialize() -> void:
 	print("RULES TEST SUITE START")
+	rules_script = load("res://scripts/chess_rules.gd") as GDScript
+	if rules_script == null:
+		push_error("Unable to load the chess rules script")
+		quit(1)
+		return
 	_test_initial_position()
 	_test_legal_moves_and_undo()
 	_test_castling()
@@ -25,7 +30,7 @@ func _initialize() -> void:
 
 
 func _test_initial_position() -> void:
-	var rules = RulesScript.new()
+	var rules = rules_script.new()
 	_expect(
 		rules.to_fen() == "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", "initial FEN"
 	)
@@ -40,7 +45,7 @@ func _test_initial_position() -> void:
 
 
 func _test_legal_moves_and_undo() -> void:
-	var rules = RulesScript.new()
+	var rules = rules_script.new()
 	var first = rules.play_move(Vector2i(4, 1), Vector2i(4, 3))
 	_expect(first.get("notation", "") == "e4", "pawn algebraic notation")
 	_expect(rules.turn == "b", "turn advances after a move")
@@ -56,7 +61,7 @@ func _test_legal_moves_and_undo() -> void:
 
 
 func _test_castling() -> void:
-	var rules = RulesScript.new()
+	var rules = rules_script.new()
 	_expect(rules.load_fen("r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1"), "load castling test position")
 	_expect(rules.is_legal_move(Vector2i(4, 0), Vector2i(6, 0)), "king-side castle is legal")
 	_expect(rules.is_legal_move(Vector2i(4, 0), Vector2i(2, 0)), "queen-side castle is legal")
@@ -71,14 +76,14 @@ func _test_castling() -> void:
 
 
 func _test_pins_and_attacked_castle_squares() -> void:
-	var pinned = RulesScript.new()
+	var pinned = rules_script.new()
 	_expect(pinned.load_fen("k3r3/8/8/8/8/8/4R3/4K3 w - - 0 1"), "load pinned-piece position")
 	_expect(
 		not pinned.is_legal_move(Vector2i(4, 1), Vector2i(3, 1)),
 		"pinned rook cannot expose its king"
 	)
 
-	var castle = RulesScript.new()
+	var castle = rules_script.new()
 	_expect(
 		castle.load_fen("r3kr2/8/8/8/8/8/8/R3K2R w KQ - 0 1"), "load attacked castling position"
 	)
@@ -89,7 +94,7 @@ func _test_pins_and_attacked_castle_squares() -> void:
 
 
 func _test_en_passant() -> void:
-	var rules = RulesScript.new()
+	var rules = rules_script.new()
 	_expect(rules.load_fen("4k3/8/8/3pP3/8/8/8/4K3 w - d6 0 1"), "load en-passant test position")
 	_expect(
 		rules.is_legal_move(Vector2i(4, 4), Vector2i(3, 5)),
@@ -109,7 +114,7 @@ func _test_en_passant() -> void:
 
 
 func _test_promotion() -> void:
-	var rules = RulesScript.new()
+	var rules = rules_script.new()
 	_expect(rules.load_fen("4k3/P7/8/8/8/8/8/4K3 w - - 0 1"), "load promotion test position")
 	_expect(rules.is_legal_move(Vector2i(0, 6), Vector2i(0, 7)), "pawn reaches its promotion rank")
 	var promotion = rules.play_move(Vector2i(0, 6), Vector2i(0, 7), "N")
@@ -123,7 +128,7 @@ func _test_promotion() -> void:
 
 
 func _test_checkmate() -> void:
-	var rules = RulesScript.new()
+	var rules = rules_script.new()
 	rules.play_move(Vector2i(5, 1), Vector2i(5, 2))  # f3
 	rules.play_move(Vector2i(4, 6), Vector2i(4, 4))  # ...e5
 	rules.play_move(Vector2i(6, 1), Vector2i(6, 3))  # g4
@@ -135,14 +140,14 @@ func _test_checkmate() -> void:
 
 
 func _test_stalemate() -> void:
-	var rules = RulesScript.new()
+	var rules = rules_script.new()
 	_expect(rules.load_fen("7k/5Q2/6K1/8/8/8/8/8 b - - 0 1"), "load stalemate test position")
 	_expect(rules.is_stalemate(), "black king has no legal move and is not in check")
 	_expect(rules.game_status().get("result", "") == "stalemate", "stalemate is surfaced as a draw")
 
 
 func _test_draw_rules() -> void:
-	var rules = RulesScript.new()
+	var rules = rules_script.new()
 	_expect(rules.load_fen("4k3/8/8/8/8/8/8/R3K2R w KQ - 99 50"), "load fifty-move test position")
 	rules.play_move(Vector2i(0, 0), Vector2i(0, 1))
 	_expect(
@@ -150,7 +155,7 @@ func _test_draw_rules() -> void:
 		"fifty-move rule after 100 half-moves"
 	)
 
-	var repetition = RulesScript.new()
+	var repetition = rules_script.new()
 	for cycle in range(2):
 		repetition.play_move(Vector2i(6, 0), Vector2i(5, 2))
 		repetition.play_move(Vector2i(6, 7), Vector2i(5, 5))
@@ -163,7 +168,7 @@ func _test_draw_rules() -> void:
 		"undo also restores repetition counts"
 	)
 
-	var material = RulesScript.new()
+	var material = rules_script.new()
 	_expect(
 		material.load_fen("4k3/8/8/8/8/8/8/2B1K3 w - - 0 1"), "load insufficient-material position"
 	)
